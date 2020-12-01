@@ -26,7 +26,6 @@ def product_recurse(lines, find_sum, starting_depth, current_depth=None, values=
     if(current_depth == None):
       current_depth = starting_depth
 
-
     for x in lines:
       values[starting_depth - current_depth] = x
       if(current_depth > 0):
