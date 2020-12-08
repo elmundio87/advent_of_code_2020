@@ -12,33 +12,35 @@ def swapInstruction(line):
   return line
 
 
-def runProgram(lines):
-  index = 0
+def runProgram(lines, debug):
+  pc = 0
   instructionTracker = []
   acc = 0
   loop = False
-  while index not in instructionTracker:
-    if(index >= len(lines)):
+  while pc not in instructionTracker:
+    if(pc >= len(lines)):
       return acc,loop
-    instruction = parseInstruction(lines[index])
-    instructionTracker.append(index)
+    instruction = parseInstruction(lines[pc])
+    instructionTracker.append(pc)
     if(instruction[0] == "nop"):
-      index += 1
+      pc += 1
 
     if(instruction[0] == "acc"):
       acc += int(instruction[1])
-      index += 1
+      pc += 1
 
     if(instruction[0] == "jmp"):
-      index += int(instruction[1])
+      pc += int(instruction[1])
 
+    if debug :
+      print(instruction, acc)
 
-
-  if(index < len(lines)):
-    # print("WARNING: Program executed early due to infinite loop")
-    # print("Index",index)
-    # print("Instruction", instruction)
-    # print("Index stack", instructionTracker)
+  if(pc < len(lines)):
+    if(debug):
+      print("WARNING: Program executed early due to infinite loop")
+      print("Program Counter",pc)
+      print("Current Instruction", instruction)
+      print("Instruction Stack", instructionTracker)
     loop=True
   return acc,loop
 
@@ -46,13 +48,13 @@ print("Part 1")
 with open("input.txt", 'r') as stream:
     lines = stream.read().splitlines()
 
-print(runProgram(lines))
+print(runProgram(lines, True))
 
 print("Part 2")
 for x in range(0, len(lines)):
   lines_temp = lines[:]
   lines_temp[x] = swapInstruction(lines_temp[x])
-  result = runProgram(lines_temp)
+  result = runProgram(lines_temp, False)
   if(not result[1]):
     print(result)
 
