@@ -7,7 +7,6 @@ with open(inputFile, 'r') as stream:
 
 lines.append("")
 
-
 bagList = {}
 
 for line in lines:
@@ -17,8 +16,10 @@ for line in lines:
     for subBag in line.split(" bags contain ")[1].split(","):
       subBagAmount = subBag.strip(" ").strip(".").split(" ")[0]
       subBagName = ' '.join(subBag.strip(" ").strip(".").split(" ")[1:-1])
-      subBags[subBagName] = subBagAmount
-    bagList[bagName] = subBags
+      if subBagAmount != "no":
+        subBags[subBagName] = int(subBagAmount)
+    if bagName != "other":
+      bagList[bagName] = subBags
 
 topLevelResults = []
 totalResults = []
@@ -38,4 +39,45 @@ while stop == False:
     stop = True
   nextLevelResults = nextNextLevelResults
 
+print("Part 1")
 print(len(list(set(totalResults))))
+
+inputFile = "input2.txt"
+
+with open(inputFile, 'r') as stream:
+    lines = stream.read().splitlines()\
+
+lines.append("")
+
+def get_children(bag):
+  child_map = {}
+  for sub_bag in bagList[bag]:
+    child_map[sub_bag] = get_children(sub_bag)
+  if child_map:
+    return child_map
+  else:
+    return
+
+def lookUpNumberOfBags(bag,subBag):
+  return bagList[bag][subBag]
+
+def addUpBags(bagTree, parentBag):
+  for bag in bagTree:
+    if bagTree[bag]:
+      addUpBags(bagTree[bag],bag)
+
+bagtree = bagList['shiny gold']
+totalBags = 0
+index = 0
+stop = False
+# while not stop:
+
+result = get_children('shiny gold')
+print(result)
+totalBags = 0
+addUpBags(result, 'shiny gold')
+
+
+
+print("Part 2")
+print(totalBags)
