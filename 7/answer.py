@@ -1,12 +1,5 @@
 #!/usr/bin/env python3
 
-inputFile = "input.txt"
-
-with open(inputFile, 'r') as stream:
-    lines = stream.read().splitlines()\
-
-lines.append("")
-
 def generateBagList(lines):
   bagList = {}
   for line in lines:
@@ -22,30 +15,11 @@ def generateBagList(lines):
         bagList[bagName] = subBags
   return bagList
 
-bagList = generateBagList(lines)
-topLevelResults = []
-totalResults = []
-nextNextLevelResults = []
+# Fetch number of a specific bags that a parent bag can contain
+def lookUpNumberOfBags(bag,subBag):
+  return bagList[bag][subBag]
 
-topLevelResults = list(filter(lambda a: bagList[a].get('shiny gold'), bagList.keys()))
-totalResults += topLevelResults
-nextLevelResults = topLevelResults
-stop = False
-while stop == False:
-  totalLen = len(totalResults)
-  for bagName in nextLevelResults:
-    nextNextLevelResults += list(filter(lambda a: bagList[a].get(bagName), bagList.keys()))
-    totalResults += nextNextLevelResults
-  totalResults = list(set(totalResults))
-  if totalLen == len(totalResults):
-    stop = True
-  nextLevelResults = nextNextLevelResults
-
-print("Part 1")
-print(len(list(set(totalResults))))
-
-# Part 2
-
+# Recursive function to generate a bag dependency tree
 def get_children(bag):
   child_map = {}
   for sub_bag in bagList[bag]:
@@ -55,15 +29,41 @@ def get_children(bag):
   else:
     return
 
-def lookUpNumberOfBags(bag,subBag):
-  return bagList[bag][subBag]
-
+# Recursive function that adds up the total number of bags within a bag dependency tree
 def addUpBags(bagTree, parentBag, total=0):
   for bag in bagTree:
     total += lookUpNumberOfBags(parentBag,bag)
     if bagTree[bag]:
       total += (lookUpNumberOfBags(parentBag,bag) * addUpBags(bagTree[bag],bag))
   return total
+
+# Recursive function that determines if a bag is a direct or transitive dependency on a parent bag
+def bagTreeContainsBag(bagTree, bag, searchTerm, returnVal=False):
+  if(bagTree):
+    for bag in bagTree:
+      if bag == searchTerm or bagTreeContainsBag(bagTree[bag], bag, searchTerm):
+        returnVal = True
+  return returnVal
+
+inputFile = "input.txt"
+
+with open(inputFile, 'r') as stream:
+    lines = stream.read().splitlines()\
+
+bagList = generateBagList(lines)
+
+# Part 1
+
+totalResults = 0
+for bag in bagList:
+  bagTree = get_children(bag)
+  if(bagTreeContainsBag(bagTree, bag, 'shiny gold')):
+    totalResults += 1
+
+print("Part 1")
+print(totalResults)
+
+# Part 2
 
 totalBags = addUpBags(get_children('shiny gold'), 'shiny gold')
 
