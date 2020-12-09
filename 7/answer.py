@@ -7,20 +7,22 @@ with open(inputFile, 'r') as stream:
 
 lines.append("")
 
-bagList = {}
+def generateBagList(lines):
+  bagList = {}
+  for line in lines:
+    bagName = line.split(" bags contain ")[0]
+    subBags = {}
+    if line:
+      for subBag in line.split(" bags contain ")[1].split(","):
+        subBagAmount = subBag.strip(" ").strip(".").split(" ")[0]
+        subBagName = ' '.join(subBag.strip(" ").strip(".").split(" ")[1:-1])
+        if subBagAmount != "no":
+          subBags[subBagName] = int(subBagAmount)
+      if bagName != "other":
+        bagList[bagName] = subBags
+  return bagList
 
-for line in lines:
-  bagName = line.split(" bags contain ")[0]
-  subBags = {}
-  if line:
-    for subBag in line.split(" bags contain ")[1].split(","):
-      subBagAmount = subBag.strip(" ").strip(".").split(" ")[0]
-      subBagName = ' '.join(subBag.strip(" ").strip(".").split(" ")[1:-1])
-      if subBagAmount != "no":
-        subBags[subBagName] = int(subBagAmount)
-    if bagName != "other":
-      bagList[bagName] = subBags
-
+bagList = generateBagList(lines)
 topLevelResults = []
 totalResults = []
 nextNextLevelResults = []
@@ -42,12 +44,7 @@ while stop == False:
 print("Part 1")
 print(len(list(set(totalResults))))
 
-inputFile = "input2.txt"
-
-with open(inputFile, 'r') as stream:
-    lines = stream.read().splitlines()\
-
-lines.append("")
+# Part 2
 
 def get_children(bag):
   child_map = {}
@@ -61,23 +58,14 @@ def get_children(bag):
 def lookUpNumberOfBags(bag,subBag):
   return bagList[bag][subBag]
 
-def addUpBags(bagTree, parentBag):
+def addUpBags(bagTree, parentBag, total=0):
   for bag in bagTree:
+    total += lookUpNumberOfBags(parentBag,bag)
     if bagTree[bag]:
-      addUpBags(bagTree[bag],bag)
+      total += (lookUpNumberOfBags(parentBag,bag) * addUpBags(bagTree[bag],bag))
+  return total
 
-bagtree = bagList['shiny gold']
-totalBags = 0
-index = 0
-stop = False
-# while not stop:
-
-result = get_children('shiny gold')
-print(result)
-totalBags = 0
-addUpBags(result, 'shiny gold')
-
-
+totalBags = addUpBags(get_children('shiny gold'), 'shiny gold')
 
 print("Part 2")
 print(totalBags)
