@@ -22,22 +22,39 @@ print(diffs[1]*diffs[3])
 print("Part 2")
 
 
-def addToChain(chain,index=0):
-  currentLink = chain[index]
-  for nextLinkIndex in range(index, len(chain)):
-    if index == len(chain)-1:
-      global total
-      total += 1
-      return
 
-    if chain[nextLinkIndex] - currentLink in range(1,4):
-      addToChain(chain, nextLinkIndex)
+# Work backwards through the chain, caching
+# totals in memory to avoid recalculations
+#
+# Ref: https://github.com/andrewyazura/aoc-2020/blob/main/day-10/main.py
+def findChains(chain, memory):
+    total = 0
+    lastLink = chain[-1]
 
-  if index == 0:
+    # Fetch value from memory if it exists
+    if memory.get(lastLink):
+        return memory[lastLink]
+
+    if len(chain) == 1:
+        return 1 # Break when there's only 1 element left
+
+    # Check neighbouring links to see if any of them
+    # are within a difference of 3
+    for i in range(1, 4):
+      node = get_item(chain, -i - 1)
+
+      if node is not None and lastLink - node <= 3:
+          total += findChains(chain[:-i], memory)
+
+    memory[lastLink] = total
     return total
-  else:
-    return
 
-total = 0
-chainTree = addToChain(chain)
-print(chainTree)
+
+def get_item(l, index):
+  if -len(l) <= index < len(l):
+      return l[index]
+  return None
+
+memory = {}
+
+print(findChains(chain, memory))
